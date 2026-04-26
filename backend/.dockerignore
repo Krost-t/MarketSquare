@@ -1,0 +1,18 @@
+# Dépendances - Docker les réinstallera lui-même
+node_modules
+
+# Code compilé - Docker le recompilera lui-même
+dist
+src/generated/
+
+# Git
+.git
+src/.gitignore
+
+# Variables d'environnement - ne JAMAIS les mettre dans une image
+.env
+.env.*
+*.env
+
+# Fichiers inutiles en production
+*.md
