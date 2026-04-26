@@ -13,15 +13,12 @@ build/
 out/
 *.js.map
 *.d.ts
+*.tsbuildinfo
 
 # ========================
-# Prisma
+# Prisma (generated client)
 # ========================
-generated/
-prisma/migrations/dev.db
-prisma/migrations/dev.db-journal
-*.db
-*.db-journal
+backend/src/generated/
 
 # ========================
 # Environment variables
@@ -29,9 +26,6 @@ prisma/migrations/dev.db-journal
 .env
 .env.local
 .env.*.local
-.env.development
-.env.production
-.env.test
 
 # ========================
 # Logs
@@ -72,7 +66,6 @@ coverage/
 # ========================
 # Misc
 # ========================
-*.tsbuildinfo
 .cache/
 tmp/
 temp/

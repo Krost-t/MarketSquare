@@ -3,11 +3,11 @@ node_modules
 
 # Code compilé - Docker le recompilera lui-même
 dist
-generated
+src/generated/
 
 # Git
 .git
-.gitignore
+src/.gitignore
 
 # Variables d'environnement - ne JAMAIS les mettre dans une image
 .env
