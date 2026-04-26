@@ -1,89 +1,53 @@
 services:
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # SERVICE 1 : La base de données PostgreSQL
-  # On utilise une image officielle PostgreSQL (pas besoin de Dockerfile ici)
-  # ──────────────────────────────────────────────────────────────────────────
   db:
-    # "image" signifie qu'on utilise une image Docker toute prête (depuis Docker Hub)
-    # postgres:17-alpine = PostgreSQL version 17, variante légère (alpine)
     image: postgres:17-alpine
-
-    # Nom du container affiché dans "docker ps"
-    container_name: marketsquare_db
-
-    # "unless-stopped" = le container redémarre automatiquement après un crash
-    # ou un reboot de la machine, SAUF si tu l'as arrêté manuellement
+    container_name: postgres_DB
     restart: unless-stopped
-
-    # Variables d'environnement passées au container PostgreSQL
-    # L'image postgres officielle les utilise pour créer l'utilisateur et la BDD au premier démarrage
-    # Les valeurs ${...} viennent du fichier .env à la racine du projet
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-
-    # "volumes" permet de persister les données de la BDD sur ton disque dur
-    # Sans ça, toutes tes données seraient PERDUES à chaque "docker compose down"
-    # "postgres_data" est un volume nommé (déclaré en bas de ce fichier)
-    # Il est monté sur /var/lib/postgresql/data : l'endroit où PostgreSQL stocke ses données
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-    # Publie le port 5432 du container sur le port 5432 de ta machine
-    # Format : "port_machine:port_container"
-    # Utile pour se connecter à la BDD avec un outil externe (DBeaver, pgAdmin, etc.)
     ports:
-      - "5432:5432"
-
-    # "healthcheck" permet à Docker de savoir si PostgreSQL est vraiment prêt
-    # (démarré ≠ prêt à accepter des connexions)
-    # pg_isready est un outil PostgreSQL qui vérifie si le serveur répond
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s   # Vérifie toutes les 10 secondes
-      timeout: 5s     # Abandon si pas de réponse après 5s
-      retries: 5      # Déclare "unhealthy" après 5 échecs consécutifs
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - marketsquare_network
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # SERVICE 2 : Le backend Node.js/Express
-  # ──────────────────────────────────────────────────────────────────────────
   backend:
-    # "build" indique que Docker doit construire l'image lui-même (pas d'image toute prête)
     build:
-      context: ./backend    # Le dossier contenant le Dockerfile
+      context: ./backend
       dockerfile: Dockerfile
-
-    container_name: marketsquare_backend
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+    container_name: backend
     restart: unless-stopped
-
-    # Publie le port 3000 du container sur le port 3000 de ta machine
     ports:
-      - "3000:3000"
-
-    # Variables d'environnement passées au backend
+      - "3000:4896"
     environment:
-      PORT: 3000
-      # POINT CLÉ : l'URL de connexion à PostgreSQL
-      # "localhost" ne fonctionnerait PAS ici car chaque container est isolé
-      # Dans Docker Compose, les services se parlent via leur NOM DE SERVICE
-      # Donc "@db:5432" = "connecte-toi au service nommé 'db' sur le port 5432"
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
-
-    # "depends_on" avec condition "service_healthy" garantit que le backend
-    # ne démarre QUE lorsque PostgreSQL est prêt à accepter des connexions
-    # (grâce au healthcheck défini plus haut)
-    # Sans ça, le backend pourrait démarrer avant PostgreSQL et crasher
+      PORT: 4896
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${DATABASE_PORT}/${POSTGRES_DB}?schema=public
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4896/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - marketsquare_network
 
-# ────────────────────────────────────────────────────────────────────────────
-# VOLUMES NOMMÉS
-# Docker gère ces volumes lui-même (stockés dans /var/lib/docker/volumes/)
-# Ils persistent même si tu fais "docker compose down"
-# Pour tout supprimer (données incluses) : "docker compose down --volumes"
-# ────────────────────────────────────────────────────────────────────────────
 volumes:
   postgres_data:
+
+networks:
+  marketsquare_network:
+    driver: bridge
