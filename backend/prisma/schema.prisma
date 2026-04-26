@@ -5,9 +5,194 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+  // ========== Enums ==========
+
+  enum Role {
+    CUSTOMER
+    MERCHANT
+    ADMIN
+  }
+
+/*
+ enum OrderStatus {                                                                                     
+    PENDING                                                                                
+    PREPARING                                                                                              
+    READY                                                                                                  
+    OUT_FOR_DELIVERY                                                                                       
+    DELIVERED                                                                                              
+    CANCELLED                                                                                            
+  }
+
+  enum DeliveryType {                                                                                    
+    CLICK_AND_COLLECT
+    DELIVERY
+    IN_STORE
+  }
+  */
+
+  // ========== User ===========
+  model User {
+    id        String   @id @default(uuid()) @db.Uuid
+    email     String   @unique
+    password  String
+    firstname String
+    surname   String
+    role      Role     @default(CUSTOMER)
+    avatarUrl String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+/*     shop          Shop?
+    orders        Order[]
+    reviews       Review[]
+    favorites     Favorite[]
+    notifications Notification[] */
+  }
+/*
+  // ─── Shop ==========─
+
+  model Shop {
+    id          String   @id @default(uuid()) @db.Uuid
+    name        String
+    description String?
+    address     String
+    city        String
+    latitude    Float?
+    longitude   Float?
+    imageUrl    String?
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    merchantId String @unique @db.Uuid
+    merchant   User   @relation(fields: [merchantId], references: [id])
+
+    products  Product[]
+    orders    Order[]
+    reviews   Review[]
+    favorites Favorite[]
+  }
+
+  // ─── Product ─────────────────────────────────────────────
+
+  model Product {
+    id          String   @id @default(uuid()) @db.Uuid
+    name        String
+    description String?
+    price       Decimal  @db.Decimal(10, 2)
+    stock       Int      @default(0)
+    imageUrl    String?
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    shopId String @db.Uuid
+    shop   Shop   @relation(fields: [shopId], references: [id])
+
+    orderItems OrderItem[]
+    cartItems  CartItem[]
+  }
+
+  // ─── Cart ==========──
+
+  model Cart {
+    id         String   @id @default(uuid()) @db.Uuid
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    customerId String     @unique @db.Uuid
+    items      CartItem[]
+  }
+
+  model CartItem {
+    id       String @id @default(uuid()) @db.Uuid
+    quantity Int
+
+    cartId    String  @db.Uuid
+    cart      Cart    @relation(fields: [cartId], references: [id])
+    productId String  @db.Uuid
+    product   Product @relation(fields: [productId], references: [id])
+
+    @@unique([cartId, productId])
+  }
+
+  // ─── Order ==========─
+
+  model Order {
+    id           String       @id @default(uuid()) @db.Uuid
+    status       OrderStatus  @default(PENDING)
+    deliveryType DeliveryType
+    totalAmount  Decimal      @db.Decimal(10, 2)
+    note         String?
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+
+    customerId String @db.Uuid
+    customer   User   @relation(fields: [customerId], references: [id])
+    shopId     String @db.Uuid
+    shop       Shop   @relation(fields: [shopId], references: [id])
+
+    items OrderItem[]
+  }
+
+  model OrderItem {
+    id        String  @id @default(uuid()) @db.Uuid
+    quantity  Int
+    unitPrice Decimal @db.Decimal(10, 2)
+
+    orderId   String  @db.Uuid
+    order     Order   @relation(fields: [orderId], references: [id])
+    productId String  @db.Uuid
+    product   Product @relation(fields: [productId], references: [id])
+  }
+
+  // ─── Review ==========
+
+  model Review {
+    id        String   @id @default(uuid()) @db.Uuid
+    rating    Int
+    comment   String?
+    createdAt DateTime @default(now())
+
+    authorId String @db.Uuid
+    author   User   @relation(fields: [authorId], references: [id])
+    shopId   String @db.Uuid
+    shop     Shop   @relation(fields: [shopId], references: [id])
+
+    @@unique([authorId, shopId])
+  }
+
+  // ─── Favorite ─────────────────────────────────────────────
+
+  model Favorite {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+
+    userId String @db.Uuid
+    user   User   @relation(fields: [userId], references: [id])
+    shopId String @db.Uuid
+    shop   Shop   @relation(fields: [shopId], references: [id])
+
+    @@unique([userId, shopId])
+  }
+
+  // ─── Notification ─────────────────────────────────────────
+
+  model Notification {
+    id        String   @id @default(uuid()) @db.Uuid
+    title     String
+    body      String
+    isRead    Boolean  @default(false)
+    createdAt DateTime @default(now())
+
+    userId String @db.Uuid
+    user   User   @relation(fields: [userId], references: [id])
+  }
+  */
