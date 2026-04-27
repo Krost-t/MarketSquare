@@ -33,6 +33,11 @@ services:
     environment:
       PORT: 4896
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${DATABASE_PORT}/${POSTGRES_DB}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      JWT_COOKIE_EXPIRES_IN: ${JWT_COOKIE_EXPIRES_IN}
+      EXPRESS_PORT: ${EXPRESS_PORT}
+      NODE_ENV: ${NODE_ENV}
     depends_on:
       db:
         condition: service_healthy
