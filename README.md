@@ -1,6 +1,6 @@
 # 🏪 MarketSquare
 
-> Local marketplace for small businesses — click & collect and short-distance delivery.
+> Local marketplace for small businesses  click & collect and short-distance delivery.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-green)
@@ -49,7 +49,7 @@ MarketSquare gives them a lightweight, local online storefront. Customers discov
          │                        │
          ▼                        ▼
 ┌──────────────────────────────────────────┐
-│           Express.js — REST API          │
+│           Express.js  REST API          │
 │     RBAC · Zod · Helmet · Rate Limit     │
 ├──────────────────────────────────────────┤
 │                Prisma ORM                │
@@ -156,8 +156,8 @@ cd mobile && npm run test
 | Mobile   | Expo EAS Build    |
 | Database | Railway or Neon   |
 
-**Branches**: `main` (production), `develop` (staging) — tags `vX.X.X`
+**Branches**: `main` (production), `develop` (staging)  tags `vX.X.X`
 
 ## 📄 Licence
 
-MIT — see [LICENSE](LICENSE)
+MIT  see [LICENSE](LICENSE)
