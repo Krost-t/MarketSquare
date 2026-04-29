@@ -1,61 +1,54 @@
 # 🏪 MarketSquare
 
-> Marketplace locale pour petits commerçants — click & collect et livraison courte distance.
+> Local marketplace for small businesses — click & collect and short-distance delivery.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-green)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![React](https://img.shields.io/badge/React-18-61DAFB)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
----
+## 🔍 Overview
 
-## 🔍 Aperçu
+Small businesses have no simple solution for selling online at a local scale. Large marketplaces are expensive, complex and ill-suited to click & collect or short-distance delivery.
 
-Les petits commerçants n'ont pas de solution simple pour vendre en ligne à l'échelle locale. Les grandes marketplaces sont coûteuses, complexes et inadaptées au click & collect ou à la livraison courte distance.
+MarketSquare gives them a lightweight, local online storefront. Customers discover nearby shops, place orders and either collect in store or get them delivered.
 
-MarketSquare leur offre une vitrine en ligne légère et locale. Les clients découvrent les boutiques autour d'eux, commandent et récupèrent leurs achats en magasin ou se font livrer.
+## ✨ Features
 
----
-
-## ✨ Fonctionnalités
-
-- Catalogue public des commerces avec pages produits optimisées pour le SEO
-- Dashboard commerçant pour gérer produits, stocks et commandes
-- Parcours client complet : découverte, panier, commande, historique
-- Suivi des commandes en temps réel (`en attente → préparée → livrée / annulée`)
-- Notifications push sur mobile
-- Système de favoris et d'avis clients (1–5 étoiles)
-- Trois rôles : `CUSTOMER`, `MERCHANT`, `ADMIN`
-
----
+- Public shop catalogue with product pages
+- Merchant dashboard to manage products, stock and orders
+- Full customer journey: discovery, basket, order, history
+- Real-time order tracking (`pending → preparing → delivered / cancelled`)
+- Push notifications on mobile
+- Favourites and customer reviews (1–5 stars)
+- Three roles: `CUSTOMER`, `MERCHANT`, `ADMIN`
 
 ## 📦 Stack
 
-| Couche           | Technologie                                                        |
-|------------------|--------------------------------------------------------------------|
-| Frontend web     | Next.js 14 (App Router, SSR, ISR, RSC) · TypeScript · CSS Modules |
-| Mobile           | React Native · Expo · React Navigation                             |
-| Backend          | Express.js · TypeScript · REST API                                 |
-| Auth             | NextAuth.js (web) · JWT custom (mobile)                            |
-| ORM              | Prisma                                                             |
-| Base de données  | PostgreSQL                                                         |
-| Tests            | Jest · Supertest · Cypress                                         |
-| CI/CD            | GitHub Actions                                                     |
-| Conteneurisation | Docker · docker-compose                                            |
-
----
+| Layer            | Technology                                       |
+|------------------|--------------------------------------------------|
+| Web frontend     | React 18 · Vite · TypeScript · Tailwind CSS      |
+| Mobile           | React Native · Expo · React Navigation           |
+| Backend          | Express.js · TypeScript · REST API               |
+| Auth             | JWT (web & mobile)                               |
+| ORM              | Prisma                                           |
+| Database         | PostgreSQL                                       |
+| Tests            | Jest · Supertest · Cypress                       |
+| CI/CD            | GitHub Actions                                   |
+| Containerisation | Docker · docker-compose                          |
 
 ## 🏗️ Architecture
 
 ```
 ┌──────────────────┐     ┌─────────────────┐
-│   Next.js (Web)  │     │   Expo (Mobile) │
-│  SSR · ISR · RSC │     │   Géoloc · Push │
+│  React (Vite)    │     │   Expo (Mobile) │
+│       SPA        │     │   Geoloc · Push │
 └────────┬─────────┘     └────────┬────────┘
-         │ BFF (API Routes)       │
-         ▼                        │
-┌────────────────────────────────▼─────────┐
+         │                        │
+         ▼                        ▼
+┌──────────────────────────────────────────┐
 │           Express.js — REST API          │
 │     RBAC · Zod · Helmet · Rate Limit     │
 ├──────────────────────────────────────────┤
@@ -65,69 +58,60 @@ MarketSquare leur offre une vitrine en ligne légère et locale. Les clients dé
 └──────────────────────────────────────────┘
 ```
 
-- **Web** : Next.js SSR/ISR pour les pages publiques, RSC pour le dashboard, BFF via API Routes vers Express
-- **Mobile** : Expo consomme directement l'API REST Express
-- **Auth** : NextAuth.js côté web, JWT émis par Express côté mobile
-- **Monorepo** : `/backend`, `/web`, `/mobile`, `packages/shared` (types TS partagés, client API)
+- **Web**: React SPA built with Vite, consumes the Express REST API directly
+- **Mobile**: Expo consumes the Express REST API directly
+- **Auth**: JWT issued by Express, used by both web and mobile clients
+- **Monorepo**: `/backend`, `/web`, `/mobile`, `packages/shared` (shared TS types, API client)
 
----
-
-## ⚙️ Prérequis
+## ⚙️ Prerequisites
 
 - Node.js ≥ 18
 - Docker & Docker Compose
-- npm ou yarn
-
----
+- npm or yarn
 
 ## 🚀 Installation
 
 ```bash
-# Cloner le repo
+# Clone the repo
 git clone https://github.com/<username>/marketsquare.git
 cd marketsquare
 
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Variables d'environnement
+# Environment variables
 cp .env.example .env
-# Remplir les valeurs dans .env
+# Fill in the values in .env
 
-# Lancer les services (Postgres)
+# Start services (Postgres)
 docker compose up -d
 
-# Appliquer les migrations
+# Apply migrations
 npx prisma migrate dev
 
-# Lancer le backend
+# Start the backend
 cd backend && npm run dev
 
-# Lancer le frontend web (dans un autre terminal)
+# Start the web frontend (in another terminal)
 cd web && npm run dev
 ```
 
-L'application est accessible sur `http://localhost:3000`.
+The application is available at `http://localhost:5173`
 
----
+## 🔐 Environment Variables
 
-## 🔐 Variables d'environnement
+| Variable          | Description                    | Example                                              |
+|-------------------|--------------------------------|------------------------------------------------------|
+| `DATABASE_URL`    | PostgreSQL connection URL      | `postgresql://user:pass@localhost:5432/marketsquare` |
+| `JWT_SECRET`      | JWT secret key (API/mobile)    | `anothersecret`                                      |
+| `CORS_ORIGIN`     | Allowed origins                | `http://localhost:5173`                              |
+| `VITE_API_URL`    | Express API URL (web client)   | `http://localhost:4896`                              |
 
-| Variable          | Description                  | Exemple                                              |
-|-------------------|------------------------------|------------------------------------------------------|
-| `DATABASE_URL`    | URL de connexion PostgreSQL  | `postgresql://user:pass@localhost:5432/marketsquare` |
-| `NEXTAUTH_SECRET` | Clé secrète NextAuth.js      | `supersecret`                                        |
-| `NEXTAUTH_URL`    | URL de l'app Next.js         | `http://localhost:3000`                              |
-| `JWT_SECRET`      | Clé secrète JWT (API/mobile) | `anothersecret`                                      |
-| `CORS_ORIGIN`     | Origines autorisées          | `http://localhost:3000`                              |
-
----
-
-## 📁 Structure du projet
+## 📁 Project Structure
 
 ```
 marketsquare/
-├── backend/              # API REST Express + Prisma
+├── backend/              # Express REST API + Prisma
 │   ├── src/
 │   │   ├── controllers/
 │   │   ├── middlewares/
@@ -136,50 +120,44 @@ marketsquare/
 │   │   └── validators/
 │   └── prisma/
 │       └── schema.prisma
-├── web/                  # Next.js 14 App Router
+├── web/                  # React + Vite SPA
 │   └── src/
-│       ├── app/
+│       ├── pages/
 │       ├── components/
 │       └── lib/
 ├── mobile/               # React Native + Expo
 │   └── src/
 ├── packages/
-│   └── shared/           # Types TS et client API partagés
+│   └── shared/           # Shared TS types and API client
 ├── docker-compose.yml
 └── .github/
     └── workflows/        # CI/CD GitHub Actions
 ```
 
----
-
 ## 🧪 Tests
 
 ```bash
-# Tests unitaires + intégration (backend)
+# Unit + integration tests (backend)
 cd backend && npm run test
 
-# Tests e2e (web)
+# E2e tests (web)
 cd web && npm run test:e2e
 
-# Tests mobile
+# Mobile tests
 cd mobile && npm run test
 ```
 
----
+## 🌍 Deployment
 
-## 🌍 Déploiement
-
-| Service  | Plateforme        |
+| Service  | Platform          |
 |----------|-------------------|
-| Backend  | Railway ou Render |
-| Frontend | Vercel            |
+| Backend  | Railway or Render |
+| Frontend | Vercel or Netlify |
 | Mobile   | Expo EAS Build    |
-| BDD      | Railway ou Neon   |
+| Database | Railway or Neon   |
 
-**Branches** : `main` (production), `develop` (staging) — tags `vX.X.X`.
-
----
+**Branches**: `main` (production), `develop` (staging) — tags `vX.X.X`
 
 ## 📄 Licence
 
-MIT — voir [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE)
