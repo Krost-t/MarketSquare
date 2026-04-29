@@ -14,6 +14,7 @@ const PORT = process.env.EXPRESS_PORT;
 
 // ==== Importing routes ====
 import authRouter from "./routes/auth.routes.ts";
+import adminRouter from "./routes/admin.routes.ts";
 
 
 // ==== Middleware ==== 
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ==== API Routes ====
 app.use("/auth", authRouter);
+app.use("/admin", adminRouter);
 
 const server =app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
