@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma.ts";
 import { generateUsername } from "unique-username-generator";
 import { generateToken } from "../utils/generate.token.ts";
 
-const registerHandler = async (req: Request, res: Response) => {
+const registerHandler = async (req: Request, res: Response): Promise<Response> => {
     const { username, firstname, email, password } = req.body;
 
     const pseudo = generateUsername("_", 4);
@@ -46,7 +46,7 @@ const registerHandler = async (req: Request, res: Response) => {
     });
 }
 
-const loginHandler = async (req: Request, res: Response) => {
+const loginHandler = async (req: Request, res: Response): Promise<Response> => {
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({
@@ -79,13 +79,13 @@ const loginHandler = async (req: Request, res: Response) => {
     });
 }
 
-const logoutHandler = async (_req: Request, res: Response) => {
+const logoutHandler = async (_req: Request, res: Response): Promise<Response> => {
     res.cookie("jwt","",{
         expires: new Date(0),
         httpOnly: true,
         /* sameSite: "strict", */
     })
-    res.status(200).json({ 
+    return res.status(200).json({ 
         status: "success",
         message: "successfully logged out" });
 }
