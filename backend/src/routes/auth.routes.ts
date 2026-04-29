@@ -1,15 +1,16 @@
 import { Router } from "express";
-import type { Request, Response } from "express";
 import express from "express";
+import {registerHandler, loginHandler, logoutHandler} from "../controllers/auth.controller.ts";
+
 
 const authRouter: Router = express.Router();
 
-authRouter.get("/login", (_req:Request, res:Response) => {
-  res.json({"message": "Login route"});
-});
+authRouter.post("/login", loginHandler);
 
-authRouter.post("/register", (_req:Request, res:Response) => {
-  res.json({"message": "Register route"});
-});
+authRouter.post("/register", registerHandler);
+
+authRouter.post("/logout", logoutHandler);
+
+
 
 export default authRouter;

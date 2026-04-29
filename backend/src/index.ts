@@ -8,20 +8,24 @@ import type { Express } from "express";
 config();
 prisma.$connect()
 
-// ==== Importing routes ====
-import authRouter from "./routes/auth.routes.ts";
-
 const app: Express = express();
 
-const PORT = process.env.EXPRESS_PORT || 4896;
+const PORT = process.env.EXPRESS_PORT;
+
+// ==== Importing routes ====
+import authRouter from "./routes/auth.routes.ts";
+import adminRouter from "./routes/admin.routes.ts";
+
 
 // ==== Middleware ==== 
 // Parse JSON bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 // ==== API Routes ====
 app.use("/auth", authRouter);
+app.use("/admin", adminRouter);
 
 const server =app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
