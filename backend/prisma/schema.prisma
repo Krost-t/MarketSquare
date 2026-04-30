@@ -12,188 +12,236 @@ datasource db {
   provider = "postgresql"
 }
 
-  // ========== Enums ==========
+// ========== Enums ==========
 
-  enum Role {
-    CUSTOMER
-    MERCHANT
-    ADMIN
-  }
+enum Role {
+  MERCHANT
+  ADMIN
+  USER
+}
 
-/*
- enum OrderStatus {                                                                                     
-    PENDING                                                                                
-    PREPARING                                                                                              
-    READY                                                                                                  
-    OUT_FOR_DELIVERY                                                                                       
-    DELIVERED                                                                                              
-    CANCELLED                                                                                            
-  }
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
 
-  enum DeliveryType {                                                                                    
-    CLICK_AND_COLLECT
-    DELIVERY
-    IN_STORE
-  }
-  */
+enum AddressType {
+  SHIPPING
+  BILLING
+  BOTH
+  SHOP
+}
 
-  // ========== User ===========
-  model User {
-    id        String   @id @default(uuid()) @db.Uuid
-    email     String   @unique
-    username  String   @unique
-    password  String
-    firstname String
-    surname   String   @unique
-    role      Role     @default(CUSTOMER)
-    avatarUrl String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum HousingType {
+  HOUSE
+  APARTMENT
+  STUDIO
+  OFFICE
+  OTHER
+}
 
-/*     shop          Shop?
-    orders        Order[]
-    reviews       Review[]
-    favorites     Favorite[]
-    notifications Notification[] */
-  }
-/*
-  // ─── Shop ==========─
+enum OrderStatus {
+  PENDING    // commande créée, paiement attendu
+  PAID       // paiement validé
+  PREPARING  // préparation par le vendeur
+  SHIPPED    // expédiée
+  DELIVERED  // livrée
+  CANCELLED  // annulée avant expédition
+  RETURNED   // retournée par le client après livraison
+}
 
-  model Shop {
-    id          String   @id @default(uuid()) @db.Uuid
-    name        String
-    description String?
-    address     String
-    city        String
-    latitude    Float?
-    longitude   Float?
-    imageUrl    String?
-    isActive    Boolean  @default(true)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+enum PaymentMethod {
+  CARD
+  PAYPAL
+  BANK_TRANSFER
+}
 
-    merchantId String @unique @db.Uuid
-    merchant   User   @relation(fields: [merchantId], references: [id])
 
-    products  Product[]
-    orders    Order[]
-    reviews   Review[]
-    favorites Favorite[]
-  }
+// ========== User ===========
+model User {
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String   @unique
+  username    String   @unique
+  password    String
+  lastname    String
+  firstname   String
+  dateOfBirth DateTime @db.Date
+  gender      Gender
+  phone       String
+  role        Role @default(USER)
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // ─── Product ─────────────────────────────────────────────
+  addresses Address[]
+  reviews   Review[]
+  shop      Shop?
+  cart      Cart?
+  orders    Order[]
+}
 
-  model Product {
-    id          String   @id @default(uuid()) @db.Uuid
-    name        String
-    description String?
-    price       Decimal  @db.Decimal(10, 2)
-    stock       Int      @default(0)
-    imageUrl    String?
-    isActive    Boolean  @default(true)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+// ========== Address ===========
+model Address {
+  id          String      @id @default(uuid()) @db.Uuid
+  type        AddressType @default(SHIPPING)
+  housingType HousingType @default(HOUSE)
 
-    shopId String @db.Uuid
-    shop   Shop   @relation(fields: [shopId], references: [id])
+  streetAddress  String // n° + nom de rue
+  postalCode     String
+  addressRegion  String // département
+  addressCountry String @db.Char(2) // ISO 3166-1 alpha-2 ("FR", "BE", "US")
 
-    orderItems OrderItem[]
-    cartItems  CartItem[]
-  }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // ─── Cart ==========──
+  userId String? @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  model Cart {
-    id         String   @id @default(uuid()) @db.Uuid
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+  shopId String? @unique @db.Uuid
+  shop   Shop?   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-    customerId String     @unique @db.Uuid
-    items      CartItem[]
-  }
+  @@index([userId])
+}
 
-  model CartItem {
-    id       String @id @default(uuid()) @db.Uuid
-    quantity Int
+// ========== Shop ===========
+model Shop {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  imageUrl    String?
 
-    cartId    String  @db.Uuid
-    cart      Cart    @relation(fields: [cartId], references: [id])
-    productId String  @db.Uuid
-    product   Product @relation(fields: [productId], references: [id])
+  averageRating Decimal @default(0) @db.Decimal(2, 1)
+  reviewCount   Int     @default(0)
 
-    @@unique([cartId, productId])
-  }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // ─── Order ==========─
+  merchantId String @unique @db.Uuid
+  merchant   User   @relation(fields: [merchantId], references: [id], onDelete: Cascade)
 
-  model Order {
-    id           String       @id @default(uuid()) @db.Uuid
-    status       OrderStatus  @default(PENDING)
-    deliveryType DeliveryType
-    totalAmount  Decimal      @db.Decimal(10, 2)
-    note         String?
-    createdAt    DateTime     @default(now())
-    updatedAt    DateTime     @updatedAt
+  address  Address?
+  products Product[]
+  reviews  Review[]
+}
 
-    customerId String @db.Uuid
-    customer   User   @relation(fields: [customerId], references: [id])
-    shopId     String @db.Uuid
-    shop       Shop   @relation(fields: [shopId], references: [id])
+//  ========== Product  ===========
+model Product {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  stock       Int     @default(0)
+  imageUrl    String?
+  isActive    Boolean @default(true)
 
-    items OrderItem[]
-  }
+  averageRating Decimal @default(0) @db.Decimal(2, 1)
+  reviewCount   Int     @default(0)
 
-  model OrderItem {
-    id        String  @id @default(uuid()) @db.Uuid
-    quantity  Int
-    unitPrice Decimal @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    orderId   String  @db.Uuid
-    order     Order   @relation(fields: [orderId], references: [id])
-    productId String  @db.Uuid
-    product   Product @relation(fields: [productId], references: [id])
-  }
+  reviews    Review[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
-  // ─── Review ==========
+  shopId String @db.Uuid
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  model Review {
-    id        String   @id @default(uuid()) @db.Uuid
-    rating    Int
-    comment   String?
-    createdAt DateTime @default(now())
+  @@index([shopId])
+}
 
-    authorId String @db.Uuid
-    author   User   @relation(fields: [authorId], references: [id])
-    shopId   String @db.Uuid
-    shop     Shop   @relation(fields: [shopId], references: [id])
+// ========== Review ===========
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  rating    Decimal  @db.Decimal(2, 1)
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@unique([authorId, shopId])
-  }
+  authorId String @db.Uuid
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  // ─── Favorite ─────────────────────────────────────────────
+  productId String?  @db.Uuid
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  model Favorite {
-    id        String   @id @default(uuid()) @db.Uuid
-    createdAt DateTime @default(now())
+  shopId String? @db.Uuid
+  shop   Shop?   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-    userId String @db.Uuid
-    user   User   @relation(fields: [userId], references: [id])
-    shopId String @db.Uuid
-    shop   Shop   @relation(fields: [shopId], references: [id])
+  @@unique([authorId, productId])
+  @@unique([authorId, shopId])
+  @@index([productId])
+  @@index([shopId])
+}
 
-    @@unique([userId, shopId])
-  }
+// ========== Cart ===========
+model Cart {
+  id String @id @default(uuid()) @db.Uuid
 
-  // ─── Notification ─────────────────────────────────────────
+  customerId String @unique @db.Uuid
+  customer   User   @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  model Notification {
-    id        String   @id @default(uuid()) @db.Uuid
-    title     String
-    body      String
-    isRead    Boolean  @default(false)
-    createdAt DateTime @default(now())
+  items CartItem[]
 
-    userId String @db.Uuid
-    user   User   @relation(fields: [userId], references: [id])
-  }
-  */
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========== CartItem ===========
+model CartItem {
+  id       String @id @default(uuid()) @db.Uuid
+  quantity Int
+
+  cartId String @db.Uuid
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+}
+
+// ========== Order ===========
+model Order {
+  id            String        @id @default(uuid()) @db.Uuid
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  totalAmount   Decimal       @db.Decimal(10, 2)
+
+  // Snapshot de l'adresse de livraison (immuable une fois la commande créée)
+  shippingStreet     String
+  shippingPostalCode String
+  shippingRegion     String
+  shippingCountry    String @db.Char(2)
+
+  customerId String @db.Uuid
+  customer   User   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+// ========== OrderItem ===========
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2) // snapshot du prix au moment de la commande
+
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+}
+
