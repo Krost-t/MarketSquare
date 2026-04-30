@@ -21,6 +21,7 @@ services:
       - marketsquare_network
 
   backend:
+    image: krost-t/marketsquare-backend:0.0.1
     build:
       context: ./backend
       dockerfile: Dockerfile

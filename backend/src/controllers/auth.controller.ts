@@ -5,11 +5,11 @@ import { generateUsername } from "unique-username-generator";
 import { generateToken } from "../utils/generate.token.ts";
 
 const registerHandler = async (req: Request, res: Response): Promise<Response> => {
-    const { username, firstname, email, password } = req.body;
+    const { lastname, firstname, age, phone, email, password } = req.body;
 
     const pseudo = generateUsername("_", 4);
     const userExists = await prisma.user.findUnique({
-        where: { email: email, username: username }
+        where: { email: email, username: lastname }
     });
     // Check if user already exists
     if (userExists) {
@@ -23,10 +23,12 @@ const registerHandler = async (req: Request, res: Response): Promise<Response> =
     const user = await prisma.user.create({
         data: {
             email,
-            username,
+            lastname,
             password: hashedPassword,
             firstname,
-            surname: pseudo, // auto-généré
+            username: pseudo, // auto-généré
+            age,
+            phone
         }
     })
 
@@ -38,9 +40,11 @@ const registerHandler = async (req: Request, res: Response): Promise<Response> =
         user: {
             id: user.id,
             email: user.email,
-            username: user.username,
+            lastname: user.lastname,
             firstname: user.firstname,
-            surname: user.surname
+            username: user.username,
+            age: user.age,
+            phone: user.phone
         },
         token,
     });

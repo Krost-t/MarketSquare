@@ -41,7 +41,7 @@ MarketSquare gives them a lightweight, local online storefront. Customers discov
 
 ## 🏗️ Architecture
 
-```
+```bash
 ┌──────────────────┐     ┌─────────────────┐
 │  React (Vite)    │     │   Expo (Mobile) │
 │       SPA        │     │   Geoloc · Push │
@@ -109,7 +109,7 @@ The application is available at `http://localhost:5173`
 
 ## 📁 Project Structure
 
-```
+```bash
 marketsquare/
 ├── backend/              # Express REST API + Prisma
 │   ├── src/
