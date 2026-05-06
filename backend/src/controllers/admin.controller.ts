@@ -16,11 +16,11 @@ const showAllUsersHandler = async (_req: Request, res: Response): Promise<void> 
         }
     });
 
-     res.status(200).json({ status: "Success", data: users });
+    res.status(200).json({ status: "Success", data: users });
 };
 
 const showOneUserHandler = async (req: Request, res: Response): Promise<void> => {
-    const {id} = req.params
+    const { id } = req.params
 
     if (!id || typeof id !== "string") {
         res.status(400).json({ message: "User ID is required" });
@@ -32,10 +32,10 @@ const showOneUserHandler = async (req: Request, res: Response): Promise<void> =>
     })
 
     if (!user) {
-         res.status(404).json({ message: "User not found" });
-     }
+        res.status(404).json({ message: "User not found" });
+    }
 
-     res.status(200).json({ status: "Success", data: user });
+    res.status(200).json({ status: "Success", data: user });
 }
 
 const deleteOneUserHandler = async (req: Request, res: Response): Promise<void> => {
@@ -47,14 +47,39 @@ const deleteOneUserHandler = async (req: Request, res: Response): Promise<void> 
     }
 
     const user = await prisma.user.delete({
-        where: { id: id},
+        where: { id: id },
     });
 
     if (!user) {
         res.status(404).json({ message: "User not found" });
     }
 
-    res.status(201).json({ status: "Success",   message: "User deleted successfully", });
+    res.status(201).json({ status: "Success", message: "User deleted successfully", });
 };
 
-export { showAllUsersHandler, showOneUserHandler, deleteOneUserHandler };
+const createUserHandler = async (req: Request, res: Response): Promise<void> => {}
+
+const updateOneFieldUserHandler = async (req: Request, res: Response): Promise<void> => {}
+
+const updateOneRoleUserHandler = async (req: Request, res: Response): Promise<void> => {}
+
+const listAllReviewsHandler = async (req: Request, res: Response): Promise<void> => {}
+
+const deleteAnyReviewHandler = async (req: Request, res: Response): Promise<void> => {}
+
+const listAllShopsForModerationHandler = async (req: Request, res: Response): Promise<void> => {}
+
+const deleteAnyShopHandler = async (req: Request, res: Response): Promise<void> => {}
+
+export {
+    showAllUsersHandler,
+    showOneUserHandler,
+    deleteOneUserHandler,
+    createUserHandler,
+    updateOneFieldUserHandler,
+    updateOneRoleUserHandler,
+    listAllReviewsHandler,
+    deleteAnyReviewHandler,
+    listAllShopsForModerationHandler,
+    deleteAnyShopHandler,
+};
