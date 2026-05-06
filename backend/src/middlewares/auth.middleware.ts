@@ -1,9 +1,18 @@
+
+import type { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
 import {prisma} from "../lib/prisma.ts"
-import type { Request, Response, NextFunction } from "express";
 
 
-// This middleware checks for the presence of a JWT token in the cookies, verifies it, and attaches the user information to the request object if valid
+ const adminMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+    if((req as any).user && (req as any).user.role === "ADMIN") {
+        next();
+    } else {
+        res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+}
+
+
 const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     let token 
 
@@ -37,4 +46,4 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction): 
     }
 }
 
-export default authMiddleware;
+export { adminMiddleware, authMiddleware };
