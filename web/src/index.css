@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --color-ink-50: #f6f7f8;
+  --color-ink-100: #eceef1;
+  --color-ink-200: #dadde3;
+  --color-ink-300: #bfc4cc;
+  --color-ink-400: #8d94a0;
+  --color-ink-500: #646b78;
+  --color-ink-600: #4a505c;
+  --color-ink-700: #353a44;
+  --color-ink-800: #22262e;
+  --color-ink-900: #15181e;
+  --color-ink-950: #0c0e12;
+
+  --color-tomato-50: #fff3ef;
+  --color-tomato-100: #ffe3d9;
+  --color-tomato-200: #ffc4b0;
+  --color-tomato-400: #f2734d;
+  --color-tomato-500: #e2522a;
+  --color-tomato-600: #c63f1a;
+  --color-tomato-700: #a23215;
+
+  --color-brand-50: var(--color-tomato-50);
+  --color-brand-100: var(--color-tomato-100);
+  --color-brand-200: var(--color-tomato-200);
+  --color-brand-500: var(--color-tomato-500);
+  --color-brand-600: var(--color-tomato-600);
+  --color-brand-700: var(--color-tomato-600);
+  --color-brand-800: var(--color-tomato-700);
+  --color-brand-900: var(--color-tomato-700);
+  --color-accent-300: var(--color-tomato-200);
+  --color-accent-400: var(--color-tomato-500);
+  --color-accent-500: var(--color-tomato-600);
+  --color-paper: var(--color-ink-50);
+
+  --radius-ui: 8px;
+  --radius-panel: 12px;
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+  body {
+    @apply bg-ink-50 font-sans text-ink-800 antialiased dark:bg-ink-950 dark:text-ink-100;
+  }
+  h1, h2, h3 {
+    @apply tracking-tight text-ink-900 dark:text-white;
+  }
+  ::selection {
+    @apply bg-tomato-200 text-ink-900;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-ui)] px-3.5 py-2 text-sm font-medium transition
+    active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tomato-500;
+}
+
+@utility btn-primary {
+  @apply btn bg-ink-900 text-white hover:bg-ink-700 dark:bg-white dark:text-ink-900 dark:hover:bg-ink-200;
+}
+
+@utility btn-accent {
+  @apply btn bg-tomato-500 text-white hover:bg-tomato-600;
+}
+
+@utility btn-ghost {
+  @apply btn border border-ink-200 bg-white text-ink-800 hover:bg-ink-100 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:hover:bg-ink-800;
+}
+
+@utility btn-danger {
+  @apply btn border border-ink-200 bg-white text-tomato-700 hover:bg-tomato-50 dark:border-ink-700 dark:bg-ink-900 dark:text-tomato-400 dark:hover:bg-ink-800;
+}
+
+@utility input {
+  @apply w-full rounded-[var(--radius-ui)] border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400
+    focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10
+    dark:border-ink-700 dark:bg-ink-900 dark:text-white dark:placeholder:text-ink-500 dark:focus:border-ink-300 dark:focus:ring-white/10;
+}
+
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-300;
+}
+
+@utility card {
+  @apply rounded-[var(--radius-panel)] border border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-900;
+}
+
+@utility chip {
+  @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3 py-1.5 text-sm font-medium text-ink-700 transition
+    hover:border-ink-400 aria-pressed:border-ink-900 aria-pressed:bg-ink-900 aria-pressed:text-white
+    dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:aria-pressed:border-white dark:aria-pressed:bg-white dark:aria-pressed:text-ink-900;
+}
+
+@utility num {
+  @apply font-mono tabular-nums;
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--color-ink-100);
+}
+
+@media (prefers-color-scheme: dark) {
+  .leaflet-container {
+    background: var(--color-ink-900);
+  }
+  .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+  .leaflet-control-attribution {
+    background: rgb(12 14 18 / 0.7) !important;
+    color: var(--color-ink-400) !important;
+  }
+  .leaflet-control-attribution a {
+    color: var(--color-ink-300) !important;
+  }
+}
+
+.map-pin {
+  background: none;
+  border: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

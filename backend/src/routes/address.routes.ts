@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {authMiddleware} from "../middlewares/auth.middleware.ts";
+import {authMiddleware} from "../middlewares/user.middleware.ts";
 import {
     listMyAddressesHandler,
     getOneAddressHandler,

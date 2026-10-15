@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "MarketSquare",
+    "slug": "marketsquare",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.marketsquare.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#15181e"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "dev.marketsquare.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#15181e"
+        }
+      ],
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#15181e"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "MarketSquare utilise votre position pour afficher les commerces autour de vous."
+        }
+      ],
+      "expo-font"
+    ],
+    "scheme": "marketsquare"
+  }
+}

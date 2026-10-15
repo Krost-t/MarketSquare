@@ -42,21 +42,31 @@ enum HousingType {
 }
 
 enum OrderStatus {
-  PENDING    // commande créée, paiement attendu
-  PAID       // paiement validé
-  PREPARING  // préparation par le vendeur
-  SHIPPED    // expédiée
-  DELIVERED  // livrée
-  CANCELLED  // annulée avant expédition
-  RETURNED   // retournée par le client après livraison
+  PENDING // commande créée, paiement attendu
+  PAID // paiement validé
+  PREPARING // préparation par le vendeur
+  SHIPPED // expédiée
+  DELIVERED // livrée
+  CANCELLED // annulée avant expédition
+  RETURNED // retournée par le client après livraison
 }
 
 enum PaymentMethod {
   CARD
   PAYPAL
   BANK_TRANSFER
+  ON_SITE
 }
 
+enum MealSlot {
+  LUNCH
+  DINNER
+}
+
+enum DeliveryMethod {
+  PICKUP
+  DELIVERY
+}
 
 // ========== User ===========
 model User {
@@ -64,13 +74,15 @@ model User {
   email       String   @unique
   username    String   @unique
   password    String
+  passwordChangedAt DateTime?
   lastname    String
   firstname   String
   dateOfBirth DateTime @db.Date
   gender      Gender
   phone       String
-  role        Role @default(USER)
+  role        Role     @default(USER)
   avatarUrl   String?
+  pushToken   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -79,6 +91,10 @@ model User {
   shop      Shop?
   cart      Cart?
   orders    Order[]
+  favorites Favorite[]
+
+  shoppingItems ShoppingListItem[]
+  mealPlan      MealPlanEntry[]
 }
 
 // ========== Address ===========
@@ -87,10 +103,13 @@ model Address {
   type        AddressType @default(SHIPPING)
   housingType HousingType @default(HOUSE)
 
-  streetAddress  String // n° + nom de rue
-  postalCode     String
-  addressRegion  String // département
-  addressCountry String @db.Char(2) // ISO 3166-1 alpha-2 ("FR", "BE", "US")
+  streetAddress   String // n° + nom de rue
+  postalCode      String
+  addressLocality String
+  addressRegion   String // département
+  addressCountry  String @db.Char(2) // ISO 3166-1 alpha-2 ("FR", "BE", "US")
+  latitude        Float?
+  longitude       Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -110,6 +129,8 @@ model Shop {
   name        String
   description String?
   imageUrl    String?
+  category    String?
+  osmId       String? @unique
 
   averageRating Decimal @default(0) @db.Decimal(2, 1)
   reviewCount   Int     @default(0)
@@ -123,6 +144,7 @@ model Shop {
   address  Address?
   products Product[]
   reviews  Review[]
+  orders   Order[]
 }
 
 //  ========== Product  ===========
@@ -144,6 +166,7 @@ model Product {
   reviews    Review[]
   cartItems  CartItem[]
   orderItems OrderItem[]
+  favorites  Favorite[]
 
   shopId String @db.Uuid
   shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
@@ -207,19 +230,24 @@ model CartItem {
 
 // ========== Order ===========
 model Order {
-  id            String        @id @default(uuid()) @db.Uuid
-  status        OrderStatus   @default(PENDING)
-  paymentMethod PaymentMethod
-  totalAmount   Decimal       @db.Decimal(10, 2)
+  id             String         @id @default(uuid()) @db.Uuid
+  status         OrderStatus    @default(PENDING)
+  paymentMethod  PaymentMethod
+  deliveryMethod DeliveryMethod @default(DELIVERY)
+  totalAmount    Decimal        @db.Decimal(10, 2)
 
   // Snapshot de l'adresse de livraison (immuable une fois la commande créée)
-  shippingStreet     String
-  shippingPostalCode String
-  shippingRegion     String
-  shippingCountry    String @db.Char(2)
+  shippingStreet     String?
+  shippingPostalCode String?
+  shippingLocality   String?
+  shippingRegion     String?
+  shippingCountry    String? @db.Char(2)
 
   customerId String @db.Uuid
   customer   User   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  shopId String? @db.Uuid
+  shop   Shop?   @relation(fields: [shopId], references: [id], onDelete: SetNull)
 
   items OrderItem[]
 
@@ -227,21 +255,66 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([customerId])
+  @@index([shopId])
   @@index([status])
 }
 
 // ========== OrderItem ===========
 model OrderItem {
-  id        String  @id @default(uuid()) @db.Uuid
-  quantity  Int
-  unitPrice Decimal @db.Decimal(10, 2) // snapshot du prix au moment de la commande
+  id          String  @id @default(uuid()) @db.Uuid
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2) // snapshot du prix au moment de la commande
+  productName String
 
   orderId String @db.Uuid
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  productId String  @db.Uuid
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId String?  @db.Uuid
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
 }
 
+model Favorite {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model ShoppingListItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  label     String
+  quantity  String?
+  checked   Boolean  @default(false)
+  source    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model MealPlanEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  date      DateTime @db.Date
+  slot      MealSlot
+  mealId    String
+  name      String
+  thumbnail String?
+  createdAt DateTime @default(now())
+
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date, slot])
+  @@index([userId, date])
+}

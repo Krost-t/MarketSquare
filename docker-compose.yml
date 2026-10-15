@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -20,8 +20,25 @@ services:
     networks:
       - marketsquare_network
 
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+    container_name: backend_migrate
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${DATABASE_PORT}/${POSTGRES_DB}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - marketsquare_network
+
   backend:
-    image: krost-t/marketsquare-backend:0.0.1
+    image: krost-t/marketsquare-backend:0.1.0
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -39,9 +56,12 @@ services:
       JWT_COOKIE_EXPIRES_IN: ${JWT_COOKIE_EXPIRES_IN}
       EXPRESS_PORT: ${EXPRESS_PORT}
       NODE_ENV: ${NODE_ENV}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4896/ || exit 1"]
       interval: 10s
